@@ -177,9 +177,15 @@ export class LiveEditDocument<TDoc = any> {
     const changeID = uuid()
     let patches: Patch[]
     console.log("Old value", this.value)
-    const nextValue = produce(this.value, func, p => {
-      patches = p
-    })
+    const nextValue = produce(
+      this.value,
+      draft => {
+        func(draft as TDoc)
+      },
+      p => {
+        patches = p
+      }
+    )
     this.value = nextValue
     this.queue.push({
       changeID,

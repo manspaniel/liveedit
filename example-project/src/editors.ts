@@ -10,8 +10,8 @@ type EditorComponent<TDoc> = ComponentType<{
 }>
 
 // Define our list of editors, mapping a file type to an editor component
-export const Editors: {
-  [key in keyof FileTypes]: EditorComponent<FileTypes[key]>
-} = {
+export const Editors: { [key: string]: EditorComponent<any> } = {
   blogPost: BlogPostEditor
+} as {
+  [key in keyof FileTypes]: EditorComponent<FileTypes[key]>
 }

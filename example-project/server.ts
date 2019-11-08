@@ -37,8 +37,8 @@ function bootExample() {
       blogPost: {
         async load(id: string) {
           return {
-            title: "fish",
-            authors: ["daniel"],
+            title: "Example blog post!",
+            tags: ["cool"],
             paragraphs: ["oh heeyyy!"]
           }
         },

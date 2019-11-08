@@ -5,8 +5,14 @@ import { createClient } from "../client"
 import { Editors } from "../editors"
 import { LiveEditDocument } from "../../../src/client"
 
+function useForceUpdate() {
+  const [v, setV] = React.useState(0)
+  return () => setV(Date.now())
+}
+
 export function App() {
   const client = React.useMemo(createClient, [])
+  const forceUpdate = useForceUpdate()
   const [target, setTarget] = React.useState({
     type: "",
     id: ""
@@ -36,17 +42,38 @@ export function App() {
     }
   }, [target.type, target.id])
 
-  console.log("Doc is", doc)
+  React.useEffect(() => {
+    if (doc) {
+      return doc.subscribe(() => {
+        forceUpdate()
+      })
+    }
+  }, [doc])
+
+  const EditorComponent = doc && Editors[doc.type]
+
+  console.log("Redraw")
 
   return (
     <Wrapper>
-      <FileList
-        onChoose={(type, id) => {
-          console.log("Chose", type, id)
-          setTarget({ type, id })
-        }}
-      />
-      {doc && <Editor doc={doc} />}
+      <Sidebar>
+        <FileList
+          selected={target}
+          onChoose={(type, id) => {
+            console.log("Chose", type, id)
+            setTarget({ type, id })
+            setDoc(null)
+          }}
+        />
+      </Sidebar>
+      {doc && EditorComponent && (
+        <Editor>
+          <EditorComponent
+            value={doc.value}
+            propose={func => doc.propose(func)}
+          />
+        </Editor>
+      )}
     </Wrapper>
   )
 }
@@ -57,27 +84,44 @@ const Wrapper = styled.div`
   left: 0;
   right: 0;
   bottom: 0;
+  display: flex;
+  font-family: "Roboto", --apple-system, sans-serif;
+  font-size: 15px;
+  align-items: stretch;
+  color: #555555;
 `
 
-function Editor({ doc }: { doc: LiveEditDocument }) {
-  if (!doc) {
-    return <div>select a doc!</div>
-  } else if (doc.type in Editors) {
-    const Component = Editors[doc.type]
-    const [value, setValue] = React.useState(doc.value)
-    React.useEffect(() => {
-      setValue(doc.value)
-      return doc.subscribe(value => {
-        setValue(value)
-      })
-    }, [doc])
-    console.log("Re-rendering editor component", value)
-    return (
-      <Component
-        value={value}
-        loaded={true}
-        propose={(func: any) => doc.propose(func)}
-      />
-    )
-  }
-}
+const Sidebar = styled.div`
+  background: #f0f0f0;
+  width: 30%;
+  max-width: 500px;
+  min-width: 150px;
+`
+
+const Editor = styled.div`
+  flex: 1 1 auto;
+  background: white;
+`
+
+// function Editor({ doc }: { doc: LiveEditDocument }) {
+//   if (!doc) {
+//     return <div>select a doc!</div>
+//   } else if (doc.type in Editors) {
+//     const Component = Editors[doc.type]
+//     const [value, setValue] = React.useState(doc.value)
+//     React.useEffect(() => {
+//       setValue(doc.value)
+//       return doc.subscribe(value => {
+//         setValue(value)
+//       })
+//     }, [doc])
+//     console.log("Re-rendering editor component", value)
+//     return (
+//       <Component
+//         value={value}
+//         loaded={true}
+//         propose={(func: any) => doc.propose(func)}
+//       />
+//     )
+//   }
+// }
