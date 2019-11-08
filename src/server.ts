@@ -169,7 +169,7 @@ export class LiveEditServer<
   async loadDoc<TTypeName extends keyof TDocs>(
     type: TTypeName,
     id: string
-  ): Promise<LiveEditServerDocument<TDocs[TTypeName]>> {
+  ): Promise<LiveEditServerDocument<TDocs[TTypeName]> | null> {
     console.log("Open file", type, id)
     // if (this.types)
     if (this.types[type]) {
@@ -211,7 +211,7 @@ export class LiveEditServerDocument<TDoc = any> {
   validate: (doc: TDoc) => boolean
 
   // State
-  changeID: string
+  changeID: string = "initial"
   doc: TDoc
 
   constructor(

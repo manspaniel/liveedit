@@ -1,9 +1,10 @@
 import http from "http"
 import express from "express"
 import { Server as WebSocketServer } from "ws"
-import { LiveEditServer } from "../src/server"
+import { LiveEditServer } from "../../src/server"
 import devMiddleware from "webpack-dev-middleware"
 import webpack from "webpack"
+import { validateBlogPost } from "./schemas"
 
 type User = {
   name: string
@@ -17,7 +18,7 @@ function bootExample() {
   const httpServer = http.createServer(app)
 
   // Webpack stuff
-  const compiler = webpack(require("./webpack.config"))
+  const compiler = webpack(require("../webpack.config"))
   app.use(
     devMiddleware(compiler, {
       publicPath: "/",
@@ -39,10 +40,14 @@ function bootExample() {
           return {
             title: "Example blog post!",
             tags: ["cool"],
-            paragraphs: ["oh heeyyy!"]
+            paragraphs: ["oh heeyyy!"],
+            totalLikes: Math.floor(Math.random() * 10)
           }
         },
-        async save(id, data) {}
+        async save(id, data) {
+          
+        },
+        validate: validateBlogPost
       }
     }
   })

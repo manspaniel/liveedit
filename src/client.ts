@@ -4,7 +4,7 @@ import {
   Change,
   ProposalResult
 } from "./protocol"
-import produce, { Patch, applyPatches } from "immer"
+import produce, { Patch, applyPatches, produceWithPatches } from "immer"
 import uuid from "uuid/v4"
 import { string } from "prop-types"
 import { resolve } from "dns"
@@ -34,14 +34,16 @@ export class LiveEditClient<TDocTypeSet extends DocTypeSet> {
   }
 
   handleMessage(msg: ServerToClientMessage) {
+    const self = this
     switch (msg[0]) {
       case "changed":
         {
           const { id, type, change } = msg[1]
           console.log("Got change", change)
-          if (type in this.documents) {
-            if (id in this.documents[type]) {
-              const liveEditDoc: LiveEditDocument = this.documents[type][id]
+          const typedItems = this.documents[type]
+          if (typedItems) {
+            if (id in typedItems) {
+              const liveEditDoc: LiveEditDocument = typedItems[id]
               console.log("Found doc", liveEditDoc)
               liveEditDoc.patch(change)
             }
@@ -59,8 +61,9 @@ export class LiveEditClient<TDocTypeSet extends DocTypeSet> {
           )
           if (type in this.documents) {
             console.log("> Type", this.documents, type)
-            if (id in this.documents[type]) {
-              const liveEditDoc: LiveEditDocument = this.documents[type][id]
+            const typedItems = this.documents[type]
+            if (typedItems && id in typedItems) {
+              const liveEditDoc: LiveEditDocument = typedItems[id]
               console.log("Doc?", liveEditDoc.pendingResponses)
               if (liveEditDoc.pendingResponses[changeID]) {
                 liveEditDoc.pendingResponses[changeID](result)
@@ -144,20 +147,20 @@ export class LiveEditDocument<TDoc = any> {
   listeners: DocumentListener[] = []
 
   // False when the document hasn't yet loaded, true when it has
-  ready: boolean
+  ready: boolean = false
   // True when a proposal is in progress
-  proposing: boolean
+  proposing: boolean = false
   pendingResponses: {
     [changeID: string]: (result: ProposalResult) => void
   } = {}
 
   // The confirmed state and baseID
-  value: TDoc = null
-  baseID: string
+  value?: TDoc
+  baseID: string = ""
 
   // The optimistic value and baseID
-  confirmedValue: TDoc
-  confirmedBaseID: string
+  confirmedValue?: TDoc
+  confirmedBaseID: string = ""
 
   queue: {
     changeID: string
@@ -169,23 +172,16 @@ export class LiveEditDocument<TDoc = any> {
     this.type = type
     this.id = id
     this.client = client
-    this.value = null
   }
 
   propose(func: (draft: TDoc) => void) {
     console.log("Proposing")
     const changeID = uuid()
-    let patches: Patch[]
+    // let patches: Patch[]
     console.log("Old value", this.value)
-    const nextValue = produce(
-      this.value,
-      draft => {
-        func(draft as TDoc)
-      },
-      p => {
-        patches = p
-      }
-    )
+    const [nextValue, patches] = produceWithPatches(this.value, draft => {
+      func(draft as TDoc)
+    })
     this.value = nextValue
     this.queue.push({
       changeID,
@@ -265,9 +261,8 @@ export class LiveEditDocument<TDoc = any> {
     // Apply pending changes again
     while (queue.length) {
       const p = queue.shift()
-      console.log("rebasing change", p.changeID)
       try {
-        this.propose(p.func)
+        if (p) this.propose(p.func)
       } catch (e) {
         console.warn("Dropped change, it can no longer be applied")
       }

@@ -4,14 +4,32 @@
   "main": "index.js",
   "author": "Daniel Lever <daniel@ed.com.au>",
   "license": "MIT",
+  "scripts": {
+    "type-check": "tsc --noEmit",
+    "type-check:watch": "yarn type-check -- --watch",
+    "build": "yarn build:types && yarn build:js",
+    "build:types": "tsc --emitDeclarationOnly",
+    "build:js": "babel ./src --out-dir lib --extensions \".ts,.tsx\" --source-maps inline",
+    "watch": "concurrently \"yarn watch:types\" \"yarn watch:js\"",
+    "watch:types": "tsc --emitDeclarationOnly -w",
+    "watch:js": "babel ./src --out-dir lib --extensions \".ts,.tsx\" --source-maps inline -w"
+  },
   "devDependencies": {
-    "babel": "^6.23.0",
+    "@babel/cli": "^7.7.0",
+    "@babel/core": "^7.7.2",
+    "@babel/plugin-proposal-class-properties": "^7.7.0",
+    "@babel/plugin-proposal-numeric-separator": "^7.2.0",
+    "@babel/plugin-proposal-object-rest-spread": "^7.6.2",
+    "@babel/preset-env": "^7.7.1",
+    "@babel/preset-typescript": "^7.7.2",
+    "@types/uuid": "^3.4.6",
+    "@types/ws": "^6.0.3",
     "babel-loader": "^8.0.6",
+    "concurrently": "^5.0.0",
     "prettier": "^1.18.2",
     "typescript": "^3.7.2"
   },
   "dependencies": {
-    "@types/ws": "^6.0.3",
     "immer": "^5.0.0",
     "uuid": "^3.3.3"
   }

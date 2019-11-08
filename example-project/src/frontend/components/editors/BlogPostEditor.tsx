@@ -1,6 +1,6 @@
 import React from "react"
 import styled from "styled-components"
-import { BlogPost } from "../../schemas"
+import { BlogPost } from "../../../schemas"
 import { TitleEditor } from "../TitleEditor"
 import { TagList } from "../TagList"
 
@@ -26,10 +26,25 @@ export function BlogPostEditor(props: Props) {
         value={post.tags}
         update={func => propose(draft => func(draft.tags))}
       />
+      <LikeCounter>
+        <div>{post.totalLikes} Likes</div>
+        <button onClick={() => propose(draft => draft.totalLikes--)}>-</button>
+        <button onClick={() => propose(draft => draft.totalLikes++)}>+</button>
+      </LikeCounter>
     </Wrapper>
   )
 }
 
 const Wrapper = styled.div`
   padding: 30px;
+`
+
+const LikeCounter = styled.div`
+  > span {
+    font-size: 20px;
+  }
+
+  button {
+    display: block;
+  }
 `

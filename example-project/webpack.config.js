@@ -1,7 +1,7 @@
 module.exports = {
   entry: {
-    "index.html": "./src/index.html",
-    index: "./src/index.tsx"
+    "index.html": "./src/frontend/index.html",
+    index: "./src/frontend/index.tsx"
   },
   mode: "development",
   resolve: {

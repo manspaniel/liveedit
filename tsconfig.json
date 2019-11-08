@@ -1,5 +1,14 @@
 {
   "compilerOptions": {
-    "lib": ["dom"]
-  }
+    "target": "esnext",
+    "module": "commonjs",
+    "lib": ["dom"],
+    "declaration": true,
+    "outDir": "lib",
+    "strict": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": ["./src/**/*"]
 }

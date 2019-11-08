@@ -1,6 +1,6 @@
 import { ComponentType } from "react"
-import { LiveEditClient } from "../../src/client"
-import { BlogPost } from "./schemas"
+import { LiveEditClient } from "../../../src/client"
+import { BlogPost } from "../schemas"
 
 // Define our list of filetypes, mapping their type name to their document type
 export type FileTypes = {
