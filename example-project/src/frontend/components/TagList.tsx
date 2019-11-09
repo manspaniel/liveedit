@@ -10,7 +10,7 @@ export function TagList(props: Props) {
   return (
     <Wrapper>
       {props.value.map((label, x) => (
-        <Item>
+        <Item key={x}>
           <span>{label}</span>
           <Remove
             onClick={e =>

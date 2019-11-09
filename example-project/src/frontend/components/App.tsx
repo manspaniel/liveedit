@@ -1,9 +1,17 @@
 import React from "react"
 import styled from "styled-components"
 import { FileList } from "./FileList"
-import { createClient } from "../client"
+// import { createClient } from "../client"
 import { Editors } from "../editors"
-import { LiveEditDocument } from "../../../src/client"
+// import { LiveEditDocument } from "../../../src/client"
+import { LiveEditDocument, autoImmer, useClient } from "../../../../lib"
+
+import { BlogPost } from "../../schemas"
+
+// // Define our list of filetypes, mapping their type name to their document type
+export type FileTypes = {
+  blogPost: BlogPost
+}
 
 function useForceUpdate() {
   const [v, setV] = React.useState(0)
@@ -11,7 +19,7 @@ function useForceUpdate() {
 }
 
 export function App() {
-  const client = React.useMemo(createClient, [])
+  const client = useClient<FileTypes>("ws://127.0.0.1:8080/edit")
   const forceUpdate = useForceUpdate()
   const [target, setTarget] = React.useState({
     type: "",
@@ -53,6 +61,27 @@ export function App() {
   const EditorComponent = doc && Editors[doc.type]
 
   console.log("Redraw")
+
+  React.useEffect(() => {
+    if (doc) {
+      const editable = autoImmer(doc.value, (path, func) => {
+        // Get the object at the specified path
+        console.log("p", path)
+        doc.propose(draft => {
+          let obj = draft
+          for (const s of path) {
+            obj = obj[s]
+            if (!obj) break
+          }
+          if (obj) {
+            console.log("Using drafty", obj, obj === draft)
+            func(obj)
+          }
+        })
+      })
+      window["post"] = editable
+    }
+  })
 
   return (
     <Wrapper>

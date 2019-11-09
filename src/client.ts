@@ -29,6 +29,8 @@ export class LiveEditClient<TDocTypeSet extends DocTypeSet> {
     reject: (err: Error) => void
   }[] = []
 
+  connected: boolean = false
+
   constructor(send: (msg: ClientToServerMessage) => void) {
     this.send = send
   }
@@ -175,13 +177,13 @@ export class LiveEditDocument<TDoc = any> {
   }
 
   propose(func: (draft: TDoc) => void) {
-    console.log("Proposing")
     const changeID = uuid()
     // let patches: Patch[]
-    console.log("Old value", this.value)
     const [nextValue, patches] = produceWithPatches(this.value, draft => {
       func(draft as TDoc)
     })
+    if (!patches || patches.length === 0) return
+    console.log("Proposing")
     this.value = nextValue
     this.queue.push({
       changeID,

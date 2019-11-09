@@ -16,6 +16,7 @@ export declare class LiveEditClient<TDocTypeSet extends DocTypeSet> {
         resolve: (val: any) => void;
         reject: (err: Error) => void;
     }[];
+    connected: boolean;
     constructor(send: (msg: ClientToServerMessage) => void);
     handleMessage(msg: ServerToClientMessage): void;
     loadDocument<TTypeName extends keyof TDocTypeSet, TDocType = TDocTypeSet[TTypeName]>(type: TTypeName, id: string): Promise<LiveEditDocument<TDocType>>;

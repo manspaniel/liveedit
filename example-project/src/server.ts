@@ -1,7 +1,7 @@
 import http from "http"
 import express from "express"
 import { Server as WebSocketServer } from "ws"
-import { LiveEditServer } from "../../src/server"
+import { LiveEditServer } from "../../lib"
 import devMiddleware from "webpack-dev-middleware"
 import webpack from "webpack"
 import { validateBlogPost } from "./schemas"
@@ -44,9 +44,7 @@ function bootExample() {
             totalLikes: Math.floor(Math.random() * 10)
           }
         },
-        async save(id, data) {
-          
-        },
+        async save(id, data) {},
         validate: validateBlogPost
       }
     }

@@ -1,7 +1,7 @@
 {
   "name": "liveedit",
   "version": "0.0.1",
-  "main": "index.js",
+  "main": "lib/index.js",
   "author": "Daniel Lever <daniel@ed.com.au>",
   "license": "MIT",
   "scripts": {
@@ -25,7 +25,9 @@
     "@types/uuid": "^3.4.6",
     "@types/ws": "^6.0.3",
     "babel-loader": "^8.0.6",
+    "babel-plugin-async-to-promises": "^1.0.5",
     "concurrently": "^5.0.0",
+    "fast-async": "^6.3.8",
     "prettier": "^1.18.2",
     "typescript": "^3.7.2"
   },

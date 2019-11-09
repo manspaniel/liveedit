@@ -1,5 +1,11 @@
 {
-  "presets": ["@babel/env", "@babel/typescript"],
+  "presets": [
+    [
+      "@babel/env",
+      { "useBuiltIns": false, "exclude": ["transform-regenerator"] }
+    ],
+    "@babel/typescript"
+  ],
   "plugins": [
     "@babel/proposal-class-properties",
     "@babel/proposal-object-rest-spread"
