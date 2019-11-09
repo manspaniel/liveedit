@@ -3,9 +3,10 @@ import styled from "styled-components"
 import { BlogPost } from "../../../schemas"
 import { TitleEditor } from "../TitleEditor"
 import { TagList } from "../TagList"
+import { Auto } from "auto-immer"
 
 type Props = {
-  value: BlogPost
+  value: Auto<BlogPost>
   propose: (func: (doc: BlogPost) => void) => void
 }
 
@@ -14,18 +15,8 @@ export function BlogPostEditor(props: Props) {
   const propose = props.propose
   return (
     <Wrapper>
-      <TitleEditor
-        value={post.title}
-        onChange={newTitle => {
-          props.propose(draft => {
-            draft.title = newTitle
-          })
-        }}
-      />
-      <TagList
-        value={post.tags}
-        update={func => propose(draft => func(draft.tags))}
-      />
+      <TitleEditor value={post.title} onChange={val => (post.title = val)} />
+      <TagList list={post.tags} />
       <LikeCounter>
         <div>{post.totalLikes} Likes</div>
         <button onClick={() => propose(draft => draft.totalLikes--)}>-</button>

@@ -1,6 +1,6 @@
 {
   "name": "liveedit",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "main": "lib/index.js",
   "author": "Daniel Lever <daniel@ed.com.au>",
   "license": "MIT",
@@ -33,6 +33,7 @@
   },
   "dependencies": {
     "immer": "^5.0.0",
+    "auto-immer": "^0.1.0",
     "uuid": "^3.3.3"
   }
 }

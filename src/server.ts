@@ -159,10 +159,8 @@ export class LiveEditServer<
   }
 
   getOpenDoc(type: string, id: string) {
-    console.log("Is doc open?", type, id)
     const doc =
       this.docs[type] && this.docs[type][id] ? this.docs[type][id] : null
-    console.log("doc", doc)
     return doc
   }
 
@@ -170,7 +168,6 @@ export class LiveEditServer<
     type: TTypeName,
     id: string
   ): Promise<LiveEditServerDocument<TDocs[TTypeName]> | null> {
-    console.log("Open file", type, id)
     // if (this.types)
     if (this.types[type]) {
       // Load the doc using config
@@ -229,12 +226,8 @@ export class LiveEditServerDocument<TDoc = any> {
   }
 
   handleProposal(change: Change, conn: Connection) {
-    console.log("Handling proposal", change, conn)
     // Only accept the proposal if the change is coming from the latest version of the document
     if (change.baseID !== this.changeID) {
-      console.log(
-        `Nope, your baseID is wrong yours=${change.baseID}, mine = ${this.changeID}`
-      )
       conn.send([
         "proposalResult",
         {
@@ -253,9 +246,6 @@ export class LiveEditServerDocument<TDoc = any> {
     // Ensure the document is still valid
     if (!this.validate(nextDoc)) {
       // Inform the user that the change is invalid, as it makes the document invalid
-      console.log(
-        `Drop this request - your update caused the document to become invalid.`
-      )
       conn.send([
         "proposalResult",
         {
@@ -272,9 +262,7 @@ export class LiveEditServerDocument<TDoc = any> {
     this.doc = nextDoc
     this.changeID = change.changeID
 
-    // console.log("Informing other clients", this.clients)
     // Distribute the change to all subscribers of this document, except for the client who sent this one
-    console.log(`Distributing change`)
     this.server.sendToSubscribers(
       ["changed", { id: this.id, type: this.type, change }],
       c =>
@@ -283,7 +271,6 @@ export class LiveEditServerDocument<TDoc = any> {
     )
 
     // Inform the current client of their success
-    console.log(`Proposal accepted!`)
     conn.send([
       "proposalResult",
       { id: this.id, type: this.type, changeID: change.changeID, result: "ACK" }

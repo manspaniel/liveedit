@@ -1,33 +1,25 @@
 import React from "react"
 import styled from "styled-components"
+import { Auto } from "auto-immer"
 
 type Props = {
-  value: string[]
-  update(producer: (draft: string[]) => void): void
+  list: Auto<string[]>
 }
 
 export function TagList(props: Props) {
   return (
     <Wrapper>
-      {props.value.map((label, x) => (
+      {props.list.map((label, x) => (
         <Item key={x}>
           <span>{label}</span>
-          <Remove
-            onClick={e =>
-              props.update(draft => {
-                draft.splice(x, 1)
-              })
-            }
-          ></Remove>
+          <Remove onClick={e => props.list.splice(x, 1)}></Remove>
         </Item>
       ))}
       <Item
         style={{ cursor: "pointer" }}
         onClick={e => {
           const value = prompt("Enter tag name")
-          if (value.length) {
-            props.update(draft => draft.push(value))
-          }
+          props.list.push(value)
         }}
       >
         + Add

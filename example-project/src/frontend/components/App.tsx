@@ -4,7 +4,8 @@ import { FileList } from "./FileList"
 // import { createClient } from "../client"
 import { Editors } from "../editors"
 // import { LiveEditDocument } from "../../../src/client"
-import { LiveEditDocument, autoImmer, useClient } from "../../../../lib"
+import { LiveEditDocument, useClient } from "../../../../lib"
+import { auto } from "auto-immer"
 
 import { BlogPost } from "../../schemas"
 
@@ -60,28 +61,11 @@ export function App() {
 
   const EditorComponent = doc && Editors[doc.type]
 
-  console.log("Redraw")
-
-  React.useEffect(() => {
-    if (doc) {
-      const editable = autoImmer(doc.value, (path, func) => {
-        // Get the object at the specified path
-        console.log("p", path)
-        doc.propose(draft => {
-          let obj = draft
-          for (const s of path) {
-            obj = obj[s]
-            if (!obj) break
-          }
-          if (obj) {
-            console.log("Using drafty", obj, obj === draft)
-            func(obj)
-          }
-        })
-      })
-      window["post"] = editable
-    }
-  })
+  const editableDoc =
+    doc &&
+    auto(doc.value, proposal => {
+      doc.propose(proposal)
+    })
 
   return (
     <Wrapper>
@@ -89,16 +73,15 @@ export function App() {
         <FileList
           selected={target}
           onChoose={(type, id) => {
-            console.log("Chose", type, id)
             setTarget({ type, id })
             setDoc(null)
           }}
         />
       </Sidebar>
-      {doc && EditorComponent && (
+      {editableDoc && EditorComponent && (
         <Editor>
           <EditorComponent
-            value={doc.value}
+            value={editableDoc}
             propose={func => doc.propose(func)}
           />
         </Editor>

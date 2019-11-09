@@ -41,12 +41,10 @@ export class LiveEditClient<TDocTypeSet extends DocTypeSet> {
       case "changed":
         {
           const { id, type, change } = msg[1]
-          console.log("Got change", change)
           const typedItems = this.documents[type]
           if (typedItems) {
             if (id in typedItems) {
               const liveEditDoc: LiveEditDocument = typedItems[id]
-              console.log("Found doc", liveEditDoc)
               liveEditDoc.patch(change)
             }
           }
@@ -55,18 +53,10 @@ export class LiveEditClient<TDocTypeSet extends DocTypeSet> {
       case "proposalResult":
         {
           const { id, type, changeID, result } = msg[1]
-          console.log(
-            "Got response",
-            type in this.documents,
-            type,
-            this.documents
-          )
           if (type in this.documents) {
-            console.log("> Type", this.documents, type)
             const typedItems = this.documents[type]
             if (typedItems && id in typedItems) {
               const liveEditDoc: LiveEditDocument = typedItems[id]
-              console.log("Doc?", liveEditDoc.pendingResponses)
               if (liveEditDoc.pendingResponses[changeID]) {
                 liveEditDoc.pendingResponses[changeID](result)
               }
@@ -183,7 +173,6 @@ export class LiveEditDocument<TDoc = any> {
       func(draft as TDoc)
     })
     if (!patches || patches.length === 0) return
-    console.log("Proposing")
     this.value = nextValue
     this.queue.push({
       changeID,
@@ -207,20 +196,16 @@ export class LiveEditDocument<TDoc = any> {
     if (this.proposing) return
     const change = this.queue[0]
     this.proposing = true
-    console.log("Distributing")
     const response = await this.sendProposal({
       baseID: this.confirmedBaseID,
       changeID: change.changeID,
       patches: change.patches
     })
-    console.log("Got result back")
     this.proposing = false
     if (response === "NOPE") {
-      console.log("Got rejected")
       // we keep the actions for now, and we will try to replay them after receiving the next change
     } else if (response === "DROP") {
       // we've been instructed to drop this change
-      console.log("Dropping")
       let doc = this.confirmedValue
       this.queue.shift()
       for (const change of this.queue) {
@@ -231,7 +216,6 @@ export class LiveEditDocument<TDoc = any> {
       // Send the next change!
       if (this.queue.length) this.distributeFirstChange()
     } else if (response === "ACK") {
-      console.log("Applying")
       this.confirmedValue = applyPatches(this.confirmedValue, change.patches)
       this.confirmedBaseID = change.changeID
       this.queue.shift()
@@ -252,7 +236,6 @@ export class LiveEditDocument<TDoc = any> {
   }
 
   patch(change: Change) {
-    console.log("Changing", change)
     if (change.baseID !== this.confirmedBaseID) throw "Illegal state"
     this.confirmedBaseID = change.changeID
     this.confirmedValue = applyPatches(this.confirmedValue, change.patches)
